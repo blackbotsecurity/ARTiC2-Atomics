@@ -153,7 +153,7 @@ public static def Parser(CmdPromptScript as string):
 	
 public static def Main():
 
-    command_list = Parser(`CMD_SCRIPT`)
+    command_list = Parser(`CMD_TTP`)
     for c in command_list:
         print(c)
 

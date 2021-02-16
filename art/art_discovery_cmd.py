@@ -1,5 +1,5 @@
 from blackbot.core.utils import get_path_in_package
-from blackbot.core.srv.atomic import Atomic
+from blackbot.core.wss.atomic import Atomic
 from terminaltables import SingleTable
 
 import os
@@ -9,9 +9,9 @@ class Atomic(Atomic):
     def __init__(self):
         self.name = 'Discovery/cmd'
         self.controller_type = ''
-        #self.external_id = ''
         self.version = ''
         self.language = 'boo'
+        self.ttp_list = []
         self.description = self.get_description()
         self.last_updated_by = 'Blackbot, Inc. All Rights reserved'
         self.references = ["System.Management.Automation"]
@@ -42,17 +42,17 @@ class Atomic(Atomic):
         return external_id
 
     def payload(self):
-        with open(get_path_in_package('core/srv/ttp/art/src/cmd_prompt.boo'), 'r') as ttp_src:
+        with open(get_path_in_package('core/wss/ttp/art/src/cmd_prompt.boo'), 'r') as ttp_src:
             src = ttp_src.read()
-            posh_script = get_path_in_package(f'core/srv/ttp/art/cmd_scripts/discovery/{self.options["Atomic"]["Value"]}')
+            cmd_script = get_path_in_package(f'core/wss/ttp/art/src/cmd_ttp/discovery/{self.options["Atomic"]["Value"]}')
 
-            with open(posh_script) as posh_ps1:
-                src = src.replace("CMD_SCRIPT", posh_ps1.read())
+            with open(cmd_script) as cmd:
+                src = src.replace("CMD_TTP", cmd.read())
                 
                 return src
 
     def walking_in_directory(self):
-        path = get_path_in_package('core/srv/ttp/art/cmd_scripts/discovery/')
+        path = get_path_in_package('core/wss/ttp/art/src/cmd_ttp/discovery/')
 
         (root, _, filenames) = next(os.walk(path))
         return (root, _, filenames)
@@ -76,14 +76,12 @@ class Atomic(Atomic):
         description_display = ''
         table_data = []
         for key, values in full_description.items():
-            #description_display += key
             table_data.append([f'\n#{key}', ''])
             
             for ttp_variant in values:
-                #description_display += ' '*2 + ttp_variant[0].strip('\n') + ' --- ' + ttp_variant[1] + '\n'
                 table_data.append([f'  {ttp_variant[0]}', ttp_variant[1]])
+                self.ttp_list.append(ttp_variant[1])
 
-            #description_display += '\n'
 
         table = SingleTable(table_data, title='Atomics')
         table.inner_column_border = False

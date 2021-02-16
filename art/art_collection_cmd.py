@@ -1,5 +1,5 @@
 from blackbot.core.utils import get_path_in_package
-from blackbot.core.srv.atomic import Atomic
+from blackbot.core.wss.atomic import Atomic
 from terminaltables import SingleTable
 import os
 import json
@@ -8,9 +8,9 @@ class Atomic(Atomic):
     def __init__(self):
         self.name = 'Collection/cmd'
         self.controller_type = ''
-        #self.external_id = ''
         self.version = ''
         self.language = 'boo'
+        self.ttp_list = []
         self.description = self.get_description()
         self.last_updated_by = 'Blackbot, Inc. All Rights reserved'
         self.references = ["System.Management.Automation"]
@@ -42,17 +42,17 @@ class Atomic(Atomic):
 
 
     def payload(self):
-        with open(get_path_in_package('core/srv/ttp/art/src/cmd_prompt.boo'), 'r') as ttp_src:
+        with open(get_path_in_package('core/wss/ttp/art/src/cmd_prompt.boo'), 'r') as ttp_src:
             src = ttp_src.read()
-            posh_script = get_path_in_package(f'core/srv/ttp/art/cmd_scripts/collection/{self.options["Atomic"]["Value"]}')
+            posh_script = get_path_in_package(f'core/wss/ttp/art/src/cmd_ttp/collection/{self.options["Atomic"]["Value"]}')
 
             with open(posh_script) as posh_ps1:
-                src = src.replace("CMD_SCRIPT", posh_ps1.read())
+                src = src.replace("CMD_TTP", posh_ps1.read())
                 
                 return src
 
     def walking_in_directory(self):
-        path = get_path_in_package('core/srv/ttp/art/cmd_scripts/collection/')
+        path = get_path_in_package('core/wss/ttp/art/src/cmd_ttp/collection/')
 
         (root, _, filenames) = next(os.walk(path))
         return (root, _, filenames)
@@ -80,6 +80,7 @@ class Atomic(Atomic):
             
             for ttp_variant in values:
                 table_data.append([f'  {ttp_variant[0]}', ttp_variant[1]])
+                self.ttp_list.append(ttp_variant[1])
 
         table = SingleTable(table_data, title='Atomics')
         table.inner_column_border = False
